@@ -42,7 +42,6 @@ with open('user_in', 'r') as file:
 
 def set_soundbytes():
     global soundbytes
-
     folder_path = "soundbytes/"    
     soundbytes = [os.path.join(root, file) for root, dirs, files in os.walk(folder_path) for file in files if file.endswith(".mp3")]
 
@@ -63,12 +62,13 @@ def get_idle_sound():
 
 def play_idle():
     while True:
+        time.sleep(random.randint(5, 20))
         if response_player.get_state() != vlc.State.Playing:
             sound = get_idle_sound()
             print("playing idle sound: " + sound)
             idle_player.set_mrl(sound)
             idle_player.play()
-            time.sleep(5)
+            time.sleep(random.randint(5, 20))
 
 def stop_idle():
     idle_player.stop()
@@ -97,7 +97,7 @@ def get_chatGPT_response(phrase):
     else:
         print("API Request Failed with status code:", response.status_code)
         print("Response Text:", response.text)
-        return None
+        return phrase
 
 def get_tone(phrase):
     if not phrase:
@@ -130,7 +130,7 @@ def get_tone(phrase):
     else:
         print("API Request Failed with status code:", response.status_code)
         print("Response Text:", response.text)
-        return None
+        return "happy"
     
 def generate_speech(phrase, tone):
     if not phrase:
@@ -153,13 +153,14 @@ def generate_speech(phrase, tone):
         "AUTHORIZATION": VOICE_API_KEY,
         "X-USER-ID": VOICE_USER
     }
+    print(headers)
     
-    response = requests.post(url, payload, headers)
+    response = requests.post(url, json=payload, headers=headers)
     
     if response.status_code == 200:
         play_generated_sound(response)
     else:
-        print("Request failed with status code:", response.status_code)
+        print("Voice request failed with status code:", response.status_code, response.text)
 
     
 def play_generated_sound(response):
@@ -179,6 +180,7 @@ def play_generated_sound(response):
     
         if url:
             print("URL:", url)
+            play_sound(url)
         else:
             print("No URL found in the data.")
     else:
@@ -186,7 +188,7 @@ def play_generated_sound(response):
     
 def play_sound(url): 
     while idle_player.get_state() == vlc.State.Playing:
-        time.sleep(1)
+        time.sleep(0.1)
     response_player.set_mrl(url)
     response_player.play()
     
