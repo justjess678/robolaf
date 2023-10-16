@@ -1,2 +1,4 @@
 python-vlc==3.0.18122
 requests==2.31.0
+PyAudio==0.2.11
+SpeechRecognition==3.10.0
